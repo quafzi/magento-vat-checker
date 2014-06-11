@@ -24,26 +24,36 @@ class Quafzi_VatChecker_Model_Observer extends Mage_Customer_Model_Observer
      */
     public function checkCustomers()
     {
-        $customers = Mage::getModel('customer/customer')
-            ->getCollection()
-            ->addFieldToFilter('is_active', 1);
+        $customers = Mage::getModel('customer/customer')->getCollection()->load();
+        $configAddressType = Mage::helper('customer/address')->getTaxCalculationAddressType();
         $invalidCustomers = array();
+        $done = 0;
+        $total = count($customers);
         foreach ($customers as $customer) {
-            $addresses = $customer->getAddresses();
-            foreach ($addresses as $address) {
-                // run validation for every address
-                $this->_checkCustomerVat($customer, $address);
-                if (false === $result) {
-                    // init invalid customer
-                    if (!isset($invalidCustomers[$customer->getId()])) {
-                        $invalidCustomers[$customer->getId()] = array(
-                            'customer'    => $customer,
-                            'invalidVats' => array()
-                        );
-                    }
-                    // collect wrong vat ids
-                    $invalidCustomers[$customer->getId()]['invalidVats'][] = $address->getVatId();
+            ++$done;
+            // echo "\r$done (" . round($done*100/$total) . '%)';
+            $customer = $customer->load($customer->getId());
+            $address = ($configAddressType == Mage_Customer_Model_Address_Abstract::TYPE_SHIPPING)
+                ? $customer->getDefaultShippingAddress()
+                : $customer->getDefaultBillingAddress();
+            if (false === $address
+                || '' == $address->getVatId()
+                || false === Mage::helper('core')->isCountryInEU($address->getCountry())
+            ) {
+                // skip customers without addresses
+                continue;
+            }
+            // run validation for every address
+            if (false === $this->_checkCustomerVat($customer, $address)) {
+                // init invalid customer
+                if (!isset($invalidCustomers[$customer->getId()])) {
+                    $invalidCustomers[$customer->getId()] = array(
+                        'customer'    => $customer,
+                        'invalidVats' => array()
+                    );
                 }
+                // collect wrong vat ids
+                $invalidCustomers[$customer->getId()]['invalidVats'][] = $address->getVatId();
             }
         }
         $this->_alertCustomerVat($invalidCustomers);
@@ -57,32 +67,25 @@ class Quafzi_VatChecker_Model_Observer extends Mage_Customer_Model_Observer
      */
     protected function _checkCustomerVat($customer, $customerAddress)
     {
-        if (!Mage::helper('customer/address')->isVatValidationEnabled($customer->getStore())
-            || Mage::registry(self::VIV_PROCESSED_FLAG)
-            || !$this->_canProcessAddress($customerAddress)
-        ) {
-            return;
-        }
-
         try {
-            Mage::register(self::VIV_PROCESSED_FLAG, true);
-
             /** @var $customerHelper Mage_Customer_Helper_Data */
             $customerHelper = Mage::helper('customer');
 
-            if ($customerAddress->getVatId() == ''
-                || !Mage::helper('core')->isCountryInEU($customerAddress->getCountry()))
-            {
-                return;
-            }
-
-            return $customerHelper->checkVatNumber(
+            $result = $customerHelper->checkVatNumber(
                 $customerAddress->getCountryId(),
                 $customerAddress->getVatId()
             );
+            if (false === $result->getRequestSuccess()) {
+                // request failed, validation unknown, so we assume, it's ok
+                return true;
+            }
+            //if (!$result->getIsValid()) {
+            //    echo ' - ' . $customerAddress->getVatId() . ' in ' . $customerAddress->getCountryId() . PHP_EOL;
+            //}
+            return (bool)$result->getIsValid();
 
         } catch (Exception $e) {
-            Mage::register(self::VIV_PROCESSED_FLAG, false, true);
+            echo $e->getMessage() . PHP_EOL;
         }
     }
 
