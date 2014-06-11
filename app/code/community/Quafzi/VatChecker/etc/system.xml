@@ -17,6 +17,9 @@
                 <vatchecker module="quafzi_vatchecker" translate="label">
                     <label>Periodical VAT check</label>
                     <sort_order>110</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>0</show_in_website>
+                    <show_in_store>0</show_in_store>
                     <fields>
                         <error_email translate="label">
                             <label>Error Email Recipient</label>
