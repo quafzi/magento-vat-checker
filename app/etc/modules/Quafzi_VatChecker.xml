@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+/**
+ * This file is part of Quafzi_VatChecker for Magento.
+ *
+ * @license MIT
+ * @author Thomas Birke <tbirke@netextreme.de> <quafzi>
+ * @category Quafzi
+ * @package Quafzi_VatChecker
+ * @copyright Copyright (c) 2014 Thomas Birke (http://netextreme.de)
+ */
+-->
+<config>
+    <modules>
+        <Quafzi_VatChecker>
+            <active>true</active>
+            <codePool>community</codePool>
+        </Quafzi_VatChecker>
+    </modules>
+</config>
