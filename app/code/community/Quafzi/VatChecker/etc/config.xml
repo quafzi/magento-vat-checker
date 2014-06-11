@@ -28,4 +28,15 @@
             </quafzi_vatchecker>
         </models>
     </global>
+    <adminhtml>
+        <translate>
+            <modules>
+                <Quafzi_VatChecker>
+                    <files>
+                        <default>Quafzi_VatChecker.csv</default>
+                    </files>
+                </Quafzi_VatChecker>
+            </modules>
+        </translate>
+    </adminhtml>
 </config>
