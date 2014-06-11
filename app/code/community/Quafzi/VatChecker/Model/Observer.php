@@ -106,9 +106,22 @@ class Quafzi_VatChecker_Model_Observer extends Mage_Customer_Model_Observer
                 Mage::getStoreConfig(self::XML_PATH_EMAIL_VAT_ERRORS_IDENTITY),
                 Mage::getStoreConfig(self::XML_PATH_EMAIL_VAT_ERRORS_RECIPIENT),
                 null,
-                array('invalidCustomers' => $invalidCustomers)
+                array('output' => $this->_getPrintableOutput($invalidCustomers))
             );
 
         return $this;
+    }
+
+    protected function _getPrintableOutput($invalidCustomers)
+    {
+        $output = '';
+        foreach ($invalidCustomers as $invalid) {
+            $customer = $invalid['customer'];
+            $output .= "\n#" . $customer->getEntityId() . "\t";
+            $output .= $customer->getFirstname() . ' ';
+            $output .= $customer->getLastname() . ": \t";
+            $output .= implode(', ', $invalid['invalidVats']);
+        }
+        return $output;
     }
 }

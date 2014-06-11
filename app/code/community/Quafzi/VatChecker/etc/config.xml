@@ -27,6 +27,15 @@
                 <class>Quafzi_VatChecker_Model</class>
             </quafzi_vatchecker>
         </models>
+        <template>
+            <email>
+                <vatchecker_email_template translate="label" module="quafzi_vatchecker">
+                    <label>VAT check errors</label>
+                    <file>vatchecker_errors.html</file>
+                    <type>text</type>
+                </vatchecker_email_template>
+            </email>
+        </template>
     </global>
     <adminhtml>
         <translate>

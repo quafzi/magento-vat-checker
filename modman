@@ -1,3 +1,5 @@
 app/code/community/Quafzi/VatChecker app/code/community/Quafzi/VatChecker
 app/etc/modules/Quafzi_VatChecker.xml app/etc/modules/Quafzi_VatChecker.xml
 app/locale/de_DE/Quafzi_VatChecker.csv app/locale/de_DE/Quafzi_VatChecker.csv
+app/locale/de_DE/template/email/vatcheck_errors.html app/locale/de_DE/template/email/vatcheck_errors.html
+app/locale/en_US/template/email/vatcheck_errors.html app/locale/en_US/template/email/vatcheck_errors.html
