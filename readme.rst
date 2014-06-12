@@ -4,6 +4,9 @@ Installation
 ============
 
 Install via Composer_, using package name `quafzi/magento-vat-checker`.
+You will need a running Magento cron.
+
+.. _Composer: http://getcomposer.org/
 
 Configuration
 =============
