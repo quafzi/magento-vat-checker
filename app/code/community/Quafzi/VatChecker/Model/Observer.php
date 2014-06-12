@@ -101,6 +101,10 @@ class Quafzi_VatChecker_Model_Observer extends Mage_Customer_Model_Observer
             return $this;
         }
 
+        $translate = Mage::getSingleton('core/translate');
+        /* @var $translate Mage_Core_Model_Translate */
+        $translate->setTranslateInline(false);
+
         $emailTemplate = Mage::getModel('core/email_template');
         /* @var $emailTemplate Mage_Core_Model_Email_Template */
         $emailTemplate->setDesignConfig(array('area' => 'backend'))
@@ -111,6 +115,7 @@ class Quafzi_VatChecker_Model_Observer extends Mage_Customer_Model_Observer
                 null,
                 array('output' => $this->_getPrintableOutput($invalidCustomers))
             );
+        $translate->setTranslateInline(true);
 
         return $this;
     }

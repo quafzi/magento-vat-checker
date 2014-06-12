@@ -29,11 +29,11 @@
         </models>
         <template>
             <email>
-                <vatchecker_email_template translate="label" module="quafzi_vatchecker">
+                <customer_vatchecker_error_email_template translate="label" module="quafzi_vatchecker">
                     <label>VAT check errors</label>
-                    <file>vatchecker_errors.html</file>
+                    <file>vatcheck_errors.html</file>
                     <type>text</type>
-                </vatchecker_email_template>
+                </customer_vatchecker_error_email_template>
             </email>
         </template>
     </global>
