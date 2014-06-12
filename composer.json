@@ -1,6 +1,6 @@
 {
     "name": "quafzi/magento-vat-checker",
-    "type": "magento-module"
+    "type": "magento-module",
     "description": "Magento extension to validate customer VAT ids periodically",
     "license": "MIT",
     "authors": [
