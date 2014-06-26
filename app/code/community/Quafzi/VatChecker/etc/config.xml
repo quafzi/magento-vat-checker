@@ -52,7 +52,7 @@
         <jobs>
             <check_vat_ids>
                 <schedule>
-                    <cron_expr>16 3 * * *</cron_expr>
+                    <cron_expr>16 3 1 * *</cron_expr>
                 </schedule>
                 <run>
                     <model>quafzi_vatchecker/observer::checkCustomers</model>
