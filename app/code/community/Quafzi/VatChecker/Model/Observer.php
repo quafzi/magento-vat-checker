@@ -79,9 +79,17 @@ class Quafzi_VatChecker_Model_Observer extends Mage_Customer_Model_Observer
                 // request failed, validation unknown, so we assume, it's ok
                 return true;
             }
-            //if (!$result->getIsValid()) {
-            //    echo ' - ' . $customerAddress->getVatId() . ' in ' . $customerAddress->getCountryId() . PHP_EOL;
-            //}
+            if (!(bool)$result->getIsValid()) {
+                // in some cases we need to skip the first 2 chars of VAT ID
+                $result = $customerHelper->checkVatNumber(
+                    $customerAddress->getCountryId(),
+                    substr($customerAddress->getVatId(), 2)
+                );
+                if (false === $result->getRequestSuccess()) {
+                    // request failed, validation unknown, so we assume, it's ok
+                    return true;
+                }
+            }
             return (bool)$result->getIsValid();
 
         } catch (Exception $e) {
