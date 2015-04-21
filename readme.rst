@@ -1,5 +1,7 @@
 This Magento module allows to validate your customer's VAT id periodically.
 
+Additionally, we allow customer's VAT id to be checked correctly, even if it was entered starting with country code.
+
 Installation
 ============
 
