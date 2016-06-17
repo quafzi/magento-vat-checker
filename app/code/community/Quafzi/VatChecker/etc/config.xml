@@ -26,6 +26,11 @@
                     <data>Quafzi_VatChecker_Helper_Customer_Data</data>
                 </rewrite>
             </customer>
+            <core>
+                <rewrite>
+                    <data>Quafzi_VatChecker_Helper_Core_Data</data>
+                </rewrite>
+            </core>
         </helpers>
         <models>
             <quafzi_vatchecker>
