@@ -35,7 +35,6 @@ class Quafzi_VatChecker_Model_Observer extends Mage_Customer_Model_Observer
 
         $pages = $customers->getLastPageNumber();
         $currentPage = 1;
-        $currentPage = 117; //TODO debug
         $configAddressType = Mage::helper('customer/address')->getTaxCalculationAddressType();
         $invalidCustomers = array();
         $done = 0;
