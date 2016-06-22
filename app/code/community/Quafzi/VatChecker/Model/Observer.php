@@ -4,9 +4,11 @@
  *
  * @license MIT
  * @author Thomas Birke <tbirke@netextreme.de>
+ * @author Pascal Querner <pascal.querner@mscg.de>
  * @category Quafzi
  * @package Quafzi_VatChecker
  * @copyright Copyright (c) 2014 Thomas Birke (http://netextreme.de)
+ * @copyright Copyright (c) 2016 Pascal Querner (https://mscg.de)
  */
 
 /**
@@ -18,43 +20,64 @@ class Quafzi_VatChecker_Model_Observer extends Mage_Customer_Model_Observer
     const XML_PATH_EMAIL_VAT_ERRORS_TEMPLATE  = 'customer/vatchecker/error_email_template';
     const XML_PATH_EMAIL_VAT_ERRORS_IDENTITY  = 'customer/vatchecker/error_email_identity';
     const XML_PATH_EMAIL_VAT_ERRORS_RECIPIENT = 'customer/vatchecker/error_email';
+    const CUSTOMERS_PER_CYCLE = 100;
 
     /**
      * validate VAT numbers of all customers
      */
     public function checkCustomers()
     {
-        $customers = Mage::getModel('customer/customer')->getCollection()->load();
+        /** @var Mage_Customer_Model_Entity_Customer_Collection $customers */
+        $customers = Mage::getModel('customer/customer')
+            ->getCollection()
+            ->setPageSize(self::CUSTOMERS_PER_CYCLE)
+            ->load();
+
+        $pages = $customers->getLastPageNumber();
+        $currentPage = 1;
         $configAddressType = Mage::helper('customer/address')->getTaxCalculationAddressType();
         $invalidCustomers = array();
         $done = 0;
-        $total = count($customers);
-        foreach ($customers as $customer) {
-            ++$done;
-            // echo "\r$done (" . round($done*100/$total) . '%)';
-            $customer = $customer->load($customer->getId());
-            $address = ($configAddressType == Mage_Customer_Model_Address_Abstract::TYPE_SHIPPING)
-                ? $customer->getDefaultShippingAddress()
-                : $customer->getDefaultBillingAddress();
-            if (false === $address
-                || '' == $address->getVatId()
-                || false === Mage::helper('core')->isCountryInEU($address->getCountry())
-            ) {
-                // skip customers without addresses
-                continue;
-            }
-            // run validation for every address
-            if (false === $this->_checkCustomerVat($customer, $address)) {
-                // init invalid customer
-                if (!isset($invalidCustomers[$customer->getId()])) {
-                    $invalidCustomers[$customer->getId()] = array(
-                        'customer'    => $customer,
-                        'invalidVats' => array()
-                    );
+        $total = $customers->getSize();
+
+        if($customers->getSize() > 0) {
+            do {
+                $customers->setCurPage($currentPage);
+                $customers->load();
+
+                /** @var Mage_Customer_Model_Customer $customer */
+                foreach ($customers as $customer) {
+                    ++$done;
+                    // echo "\r$done (" . round($done*100/$total) . '%)';
+                    $customer = $customer->load($customer->getId());
+                    $address = ($configAddressType == Mage_Customer_Model_Address_Abstract::TYPE_SHIPPING)
+                        ? $customer->getDefaultShippingAddress()
+                        : $customer->getDefaultBillingAddress();
+                    if (false === $address
+                        || '' == $address->getVatId()
+                        || false === Mage::helper('core')->isCountryInEU($address->getCountry())
+                    ) {
+                        // skip customers without addresses
+                        continue;
+                    }
+                    // run validation for every address
+                    if (false === $this->_checkCustomerVat($address)) {
+                        // init invalid customer
+                        if (!isset($invalidCustomers[$customer->getId()])) {
+                            $invalidCustomers[$customer->getId()] = array(
+                                'customer'    => $customer,
+                                'invalidVats' => array()
+                            );
+                        }
+                        // collect wrong vat ids
+                        $invalidCustomers[$customer->getId()]['invalidVats'][] = $address->getVatId();
+                    }
                 }
-                // collect wrong vat ids
-                $invalidCustomers[$customer->getId()]['invalidVats'][] = $address->getVatId();
-            }
+
+                $currentPage++;
+                // clear collection (if not done, the same page will be loaded each loop) - will also free memory
+                $customers->clear();
+            } while ($currentPage <= $pages);
         }
         $this->_alertCustomerVat($invalidCustomers);
     }
@@ -65,7 +88,7 @@ class Quafzi_VatChecker_Model_Observer extends Mage_Customer_Model_Observer
      * @param Mage_Customer_Model_Address $customerAddress
      * @return boolean
      */
-    protected function _checkCustomerVat($customer, $customerAddress)
+    protected function _checkCustomerVat($customerAddress)
     {
         try {
             /** @var $customerHelper Mage_Customer_Helper_Data */
